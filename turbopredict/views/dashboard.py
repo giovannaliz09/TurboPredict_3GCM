@@ -222,52 +222,41 @@ def render(loader=None):
 
 
 def _render_cedente_card(row):
-    """Card detalhado de risco ao buscar um cedente específico."""
     from data_loader import get_shap_simulado
 
     score = int(row["score_risco"])
     nivel = str(row["nivel_risco"])
     decisao = "✅ APROVAR" if nivel == "Baixo" else ("⚠ REVISAR" if nivel == "Médio" else "❌ NEGAR")
     dec_cor = "#66bb6a" if nivel == "Baixo" else ("#ffc107" if nivel == "Médio" else "#ef5350")
-
     shap = get_shap_simulado(row)
 
-    # Gera as barras SHAP dentro do mesmo markdown
-    bars_html = ""
+    # Cabeçalho do card
+    st.markdown(f"""
+    <div style='background:#0d1b35; border:1px solid #1e3a5f; border-radius:12px; padding:20px; margin-bottom:8px;'>
+        <div style='font-size:13px; color:#607d9e; margin-bottom:4px;'>CARD DE RISCO EXPLICÁVEL</div>
+        <div style='font-family:IBM Plex Mono,monospace; font-size:14px; color:#c8d6ea;'>{row["id_beneficiario"][:48]}...</div>
+        <div style='font-size:13px; color:{dec_cor}; margin-top:8px; font-weight:600;'>{decisao} · Score: {score}</div>
+        <div style='display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:16px 0; padding:14px 0; border-top:1px solid #1e3a5f; border-bottom:1px solid #1e3a5f;'>
+            <div><div style='font-size:11px; color:#607d9e;'>Atraso 30d</div><div style='font-family:IBM Plex Mono; font-size:18px;'>{row["pct_atraso_30"]*100:.1f}%</div></div>
+            <div><div style='font-size:11px; color:#607d9e;'>DPD Médio</div><div style='font-family:IBM Plex Mono; font-size:18px;'>{row["dpd_medio"]:.0f}d</div></div>
+            <div><div style='font-size:11px; color:#607d9e;'>Volume Total</div><div style='font-family:IBM Plex Mono; font-size:18px;'>R$ {row["vlr_total"]/1e3:.0f}k</div></div>
+        </div>
+        <div style='font-size:12px; color:#8fadc8; margin-bottom:10px; font-weight:500;'>PRINCIPAIS FATORES (SHAP simulado)</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Barras SHAP separadas
     for f in shap:
         pct = int(f["magnitude"] * 100)
         v = f["valor"]
         v_str = f"{v:.2f}" if isinstance(v, float) and v < 10 else f"{v:.0f}"
         direcao_txt = "▲ aumenta risco" if f["direcao"] == "risco" else "▼ reduz risco"
         cor_bar = "#ef5350" if f["direcao"] == "risco" else "#4caf50"
-        bars_html += f"""
-        <div style='margin:8px 0;'>
-            <div style='font-size:12px; color:#8fadc8; margin-bottom:4px;'>{f['nome']} = {v_str} {direcao_txt}</div>
-            <div style='background:#132035; border-radius:4px; height:8px; overflow:hidden;'>
-                <div style='width:{pct}%; height:100%; background:{cor_bar}; border-radius:4px;'></div>
-            </div>
-        </div>"""
-
-    st.markdown(f"""
-    <div style='background:#0d1b35; border:1px solid #1e3a5f; border-radius:12px; padding:20px; margin-bottom:16px;'>
-        <div style='font-size:13px; color:#607d9e; margin-bottom:4px;'>CARD DE RISCO EXPLICÁVEL</div>
-        <div style='font-family:IBM Plex Mono,monospace; font-size:14px; color:#c8d6ea;'>{row['id_beneficiario'][:48]}...</div>
-        <div style='font-size:13px; color:{dec_cor}; margin-top:8px; font-weight:600;'>{decisao} · Score: {score}</div>
-        <div style='display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:16px 0; padding:14px 0; border-top:1px solid #1e3a5f; border-bottom:1px solid #1e3a5f;'>
-            <div>
-                <div style='font-size:11px; color:#607d9e;'>Atraso 30d</div>
-                <div style='font-family:IBM Plex Mono; font-size:18px;'>{row['pct_atraso_30']*100:.1f}%</div>
-            </div>
-            <div>
-                <div style='font-size:11px; color:#607d9e;'>DPD Médio</div>
-                <div style='font-family:IBM Plex Mono; font-size:18px;'>{row['dpd_medio']:.0f}d</div>
-            </div>
-            <div>
-                <div style='font-size:11px; color:#607d9e;'>Volume Total</div>
-                <div style='font-family:IBM Plex Mono; font-size:18px;'>R$ {row['vlr_total']/1e3:.0f}k</div>
-            </div>
-        </div>
-        <div style='font-size:12px; color:#8fadc8; margin-bottom:10px; font-weight:500;'>PRINCIPAIS FATORES (SHAP simulado)</div>
-        {bars_html}
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown(
+            "<div style='background:#0d1b35; padding:4px 20px; margin-bottom:2px;'>"
+            f"<div style='font-size:12px; color:#8fadc8; margin-bottom:4px;'>{f['nome']} = {v_str} {direcao_txt}</div>"
+            f"<div style='background:#132035; border-radius:4px; height:8px; overflow:hidden;'>"
+            f"<div style='width:{pct}%; height:100%; background:{cor_bar}; border-radius:4px;'></div>"
+            "</div></div>",
+            unsafe_allow_html=True
+        )
