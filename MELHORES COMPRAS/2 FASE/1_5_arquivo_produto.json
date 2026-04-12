@@ -1,0 +1,38 @@
+[
+  {
+    "descricao": "Caderno",
+    "valor": 14.0,
+    "embalagem": "Plastico",
+    "icms": 2.52
+  },
+  {
+    "descricao": "Celular",
+    "valor": 1500.0,
+    "embalagem": "Caixa",
+    "icms": 270.0
+  },
+  {
+    "descricao": "Bola",
+    "valor": 15.0,
+    "embalagem": "Plastico",
+    "icms": 2.7
+  },
+  {
+    "descricao": "Cesta de Lixo",
+    "valor": 35.0,
+    "embalagem": "Caixa de Papelão",
+    "icms": 6.3
+  },
+  {
+    "descricao": "Boné",
+    "valor": 100.0,
+    "embalagem": "Caixa",
+    "icms": 18.0
+  },
+  {
+    "descricao": "Chinelo",
+    "valor": 80.0,
+    "embalagem": "Sacola",
+    "icms": 14.4
+  }
+]
